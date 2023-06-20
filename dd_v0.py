@@ -11,27 +11,35 @@ class product:
         self.carb = carb
 
 class agent:
-    def __init__(self, u, product_l):
+    def __init__(self, u, product_l, coefs, budget):
         self.u = u 
         self.product_l = product_l
+        self.coefs = coefs
+        self.budget = budget
     
     def fonc(self, lmbd, product_q): #pour chaque agent, on fait le calcul de sa fonction connaissant lambda et la quantité de produit
         sum = 0
         for i in range(0, len(self.product_l)):
-            sum += product_q[i]*(self.product_l[i].price + lmbd*self.product_l[i].carb)
+            sum += product_q[i]*(self.product_l[i].carb) 
+        return sum - u(self.coefs, product_q)
+
+    def somme_depenses(self, product_q):
+        sum = 0
+        for i in range(len(product_q)):
+            sum += product_q[i]*(self.product_l[i].price)
         return sum
-            
-    
+        
 class commu:
     def __init__(self, agent_list):
         self.agent_list = agent_list
     
-    def fonc_i(self, lmbd, C, product_q_ai):
+    def fonc_i(self, lmbd, C, x_mat):
         sum = 0
         for k in range(0, len(self.agent_list)):
-            sum += self.agent_list[k].fonc(lmbd, product_q_ai[k])
+            sum += self.agent_list[k].fonc(lmbd, x_mat[k])
         sum = sum - lmbd*C
         return sum
+    
 
     def D(self, C, lmbd):
         x = cp.Variable((len(self.agent_list), len(self.agent_list[0].product_l)))
@@ -39,11 +47,11 @@ class commu:
         constraints = [x >= 0]
         #on ajoute les contraintes
         for i in range(0, len(self.agent_list)):
-            constraints.append((self.agent_list[i].u(x[i]) >= 1))
+            constraints.append(self.agent_list[i].somme_depenses(x[i]) <= self.agent_list[i].budget)
             constraints.append(x[i][0] + x[i][1] + x[i][2] + x[i][3] + x[i][4] + x[i][5] == 1)
         
         def f(m):
-            return self.fonc_i(lmbd=lmbd, C=C, product_q_ai=m)
+            return self.fonc_i(lmbd=lmbd, C=C, x_mat=m)
         
         objective = cp.Minimize(f(x))
         prob = cp.Problem(objective, constraints)
