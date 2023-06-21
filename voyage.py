@@ -152,4 +152,4 @@ agent_us = agent("Mme. US", u2, 100000) #riche
 ens = commu([agent_europe, agent_us], product_list=product_list)
 
 
-ens.presentation_resultat([100, 5000, 10000, 100000])
+ens.presentation_resultat([5000, 7000, 9000, 10000, 1000000000])
