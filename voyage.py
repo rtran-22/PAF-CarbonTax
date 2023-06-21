@@ -93,10 +93,10 @@ class commu:
         return (x0 + x1)/2
 
 
-    def presentation_resultat(self, c_list, maxL = 1, N = 10): 
+    def presentation_resultat(self, c_list, maxL = 10, N = 1000*2): 
         for c in c_list:
             print("===========================================\n")
-            ldbd = self.Dmax_fast(c, 0, maxL, N, 10)
+            ldbd = self.Dmax_fast(c, 0, maxL, N, 400)
             x, y = self.D(ldbd, c)
             print("")
             print("LAMBDA = " + str(ldbd) + "; C = " + str(c) + "kg ; total carbone : " + str(self.carbon_total(x)) + "kg") 
