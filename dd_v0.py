@@ -19,7 +19,7 @@ class agent:
     def fonc(self, lmbd, product_q): #pour chaque agent, on fait le calcul de sa fonction connaissant lambda et la quantité de produit
         sum = 0
         for i in range(0, len(self.product_l)):
-            sum += product_q[i]*(self.product_l[i].carb) 
+            sum += lmbd*product_q[i]*(self.product_l[i].carb) 
         return sum - self.u(product_q)
 
     def somme_depenses(self, product_q):
@@ -63,14 +63,14 @@ class commu:
 
         
 
-    
+  
 
 #MODELE 
 
 def u(l, x):
     sum = 0
     for i in range(NB_DESTINATIONS):
-        sum += l[2*i]*(x[i]+l[2*i+1])**0.5
+        sum += l[2*i]*(x[i]+l[2*i+1])**0.5 - l[2*i]*(l[2*i+1])**0.5
     return sum
         
 
@@ -96,7 +96,7 @@ agent2 = agent(partial(u, l2), prod_l, l2, 30000)
 agent3 = agent(partial(u, l3), prod_l, l3, 1500)
 
 ens = commu([agent1, agent2, agent3])
-ens.D(10000, 0)
+ens.D(10000, 15)
 
 l = [g/10 for g in range(0,100)]
 #for g in l:
