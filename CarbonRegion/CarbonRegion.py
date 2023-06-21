@@ -4,7 +4,7 @@ import math
 import pandas as pd
 import matplotlib.pyplot as plt
 
-class product:
+class sector:
     def __init__(self, price, carb):
         self.price = price
         self.carb = carb
@@ -55,34 +55,37 @@ class commu:
 
     
 
-#un exemple
+#Cas du gouvernement et des régions : L'objectif pour le gouvernement est de fixer la taxe carbone optimale
+#pour des régions qui ont des objectifs économiques et des caractéristiques différentes (pop, secteurs d'activités...)
 
-l1 = [1.62, 0.1, 1.2, 1, 0.5, 1, 0.2, 1, 0.2, 1, 0.2, 1]
-l2 =  [1.62, 0.1, 0.6, 1, 1.2, 1, 0.4, 1, 0.2, 1, 0.2, 1]
-l3 =  [1.62, 0.1, 0.4, 1, 0.6, 1, 0.1, 1, 0.1, 1, 0.1, 1]
-
+idf = [1.62, 0.1, 1.2, 1, 0.5, 1, 0.2, 1, 0.2, 1, 0.2, 1]
+auvergne =  [1.62, 0.1, 0.6, 1, 1.2, 1, 0.4, 1, 0.2, 1, 0.2, 1]
+provence =  [1.62, 0.1, 0.4, 1, 0.6, 1, 0.1, 1, 0.1, 1, 0.1, 1]
+bretagne =  [1.62, 0.1, 0.4, 1, 0.6, 1, 0.1, 1, 0.1, 1, 0.1, 1]
+paysdelaloire = []
+corse = []
 def u(l, x):
     s_tmp = 0
     for k in range(0, 6):
         s_tmp += x[k]
-    return  l[0]*(x[0] + x[1] + l[1])**(0.5) + l[2]*(x[2] + l[3])**(0.5) + l[4]*(2*x[3] + x[4] + l[5])**(0.5) + l[6]*(x[5] + l[7])**(0.5) + l[8]*(x[6] + l[9])**(0.5) - (l[0]*(l[1])**(0.5) + l[2]*(l[3])**(0.5) + l[4]*(l[5])**(0.5) + l[6]*(l[7])**(0.5) + l[8]*(l[9])**(0.5))
+    return  l[0]*(x[0] + l[1])**(0.5) + l[2]*(x[2] + l[3])**(0.5) + l[4]*(2*x[3] + x[4] + l[5])**(0.5) + l[6]*(x[5] + l[7])**(0.5) + l[8]*(x[6] + l[9])**(0.5) - (l[0]*(l[1])**(0.5) + l[2]*(l[3])**(0.5) + l[4]*(l[5])**(0.5) + l[6]*(l[7])**(0.5) + l[8]*(l[9])**(0.5))
 
 
-elec_car = product(77, 37)
-petrol_car = product(50, 92)
-bus = product(35, 32)
-e_bike = product(15, 8)
-bike = product(3, 2)
-foot = product(0,0)
-choc = product(2,1)
+agricultur = sector(77, 37)
+industry = sector(50, 92)
+services = sector(35, 32)
 
-prod_l = [elec_car, petrol_car, bus, e_bike, bike, foot, choc]
+sector_l = [agricultur, industry, services]
 
-agent1 = agent(partial(u, l1), prod_l)
-agent2 = agent(partial(u, l2), prod_l)
-agent3 = agent(partial(u, l3), prod_l)
+agent1 = agent(partial(u, idf), sector_l)
+agent2 = agent(partial(u, auvergne), sector_l)
+agent3 = agent(partial(u, provence), sector_l)
+agent4 = agent(partial(u, bretagne), sector_l)
+agent5 = agent(partial(u, paysdelaloire), sector_l)
+agent6 = agent(partial(u, corse), sector_l)
 
-ens = commu([agent1, agent2, agent3])
+
+ens = commu([agent1, agent2, agent3, agent4, agent5, agent6])
 
 
 l = [g/10 for g in range(0,100)]
