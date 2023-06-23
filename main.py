@@ -56,8 +56,8 @@ class commu:
     def D(self, ldbd):
         x = cp.Variable((len(self.region_list), len(self.industry_list)))
         constraints = [x >= 0]
-        for i in range(0, len(self.region_list)):
-            constraints.append((#compléter))
+        #for i in range(0, len(self.region_list)):
+        #    constraints.append((#compléter))
 
         def f(m):
             return self.function(lbda=ldbd, x=m)
@@ -132,7 +132,7 @@ def utility_function(ranking, x_t_list, tho_list, x):  # ranking[i] < ranking[j]
     return sum2
 
 
-ridl = [0.03, 2, 8]  # j'adore les services
+ridf = [0.03, 2, 8]  # j'adore les services
 ra = [0.2, 2, 7] 
 rp = [2,1,7]
 rb = [7,3,0.5] # j'adore l'agriculture
@@ -142,25 +142,43 @@ rc = [0.2,2,8]
 
 x_tidf = [1, 1, 5]  # en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
 x_ta = [3, 3, 3]
-x_tp = [3,1,2]
+x_tp = [3, 1, 2]
 x_tb = [5, 2, 1]
 x_tpdl = [3, 1, 3]
 x_tc = [1, 1, 1]
 
-def ugrosseregion(x):
+def uidf(x):
     t = 0.5
-    return utility_function(r1, x_t1, [t, t, t, t, t, t], x)
+    return utility_function(ridf, x_tidf, [t, t, t, t, t, t], x)
 
-
-def upetiteregion(x):
+def uauvergne(x):
     t = 0.5
-    return utility_function(r2, x_t2, [t, t, t, t, t, t], x)
+    return utility_function(ra, x_ta, [t, t, t, t, t, t], x)
+
+def uprovence(x):
+    t = 0.5
+    return utility_function(rp, x_tp, [t, t, t, t, t, t], x)
+
+def ubretagne(x):
+    t = 0.5
+    return utility_function(rb, x_tb, [t, t, t, t, t, t], x)
+
+def upaysdelaloire(x):
+    t = 0.5
+    return utility_function(rpdl, x_tpdl, [t, t, t, t, t, t], x)
+
+def ucorse(x):
+    t = 0.5
+    return utility_function(rc, x_tc, [t, t, t, t, t, t], x)
 
 #il faudrait potentiellement ajouter des caractéristiques à nos régions
 
-grosseregion = region("Grosse région", ugrosseregion, 15000)  #plus peuplée
-petiteregion = region("Petite région", upetiteregion, 100000)  #moins peuplée
-
+iledefrance = region("Ile de France", uidf, 12300000) 
+auvergne = region("Auvergne", uauvergne, 8200000)
+provence = region("Provence", uprovence,5160000)
+bretagne = region("Bretagne", ubretagne,3400000)
+paysdeloire = region("Pays de la Loire",upaysdelaloire,3900000)
+corse = region("Corse", ucorse,351000)
 
 
 agriculture = industry("Agriculture", [6730953600,4487302400,2823717120,1860588800,2134204800,192078432], [16929110.55,11286073.7,7101968.329,4679591.535,5367766.76,483099.0084])
@@ -170,7 +188,7 @@ services = industry("Services", [2.99359e+11,1.99573e+11,1.25585e+11,82749686880
 
 industry_list = [agriculture, industrie, services]
 
-ens = commu([grosseregion, petiteregion], industry_list=industry_list)
+ens = commu([iledefrance, auvergne, provence, bretagne, paysdeloire, corse], industry_list=industry_list)
 
 # on a pas besoin de changer la valeur de C pour le moment. on pourra ajuster après si par ex on pense ne pas respecter
 #la cop, qu'elle est trop ambitieuse etc..
