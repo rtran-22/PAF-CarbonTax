@@ -24,23 +24,6 @@ class commu:
         self.region_list = region_list
         self.industry_list = industry_list
 
-#changement calcul: est-ce que c'est pareil de sommer sur les i que sur les a ?
-    def carbon_total(self, x):
-        c_tot = 0
-        for i in range(0, len(self.industry_list)):
-            carb=np.array(self.industry_list.carb) #on crée le vecteur correspondant (ligne)
-            vecteurx=(np.array(x)).T #x vecteur colonne
-            c_tot += np.dot(carb,vecteurx)
-        return c_tot
-
-    # ça
-    def total_benef(self, product_quantities_list):
-        pql = product_quantities_list
-        tot_benef = 0
-        for k in range(0, len(self.region_list)):
-            tot_benef += self.industry_list[k].benef * pql[k]
-        return tot_benef
-
     #ajout spécifique pour calculer C
     def C(self):
         COP=2 #on met C en tonnes ou en kg?
@@ -50,23 +33,48 @@ class commu:
         COP*=s
         return COP
 
-#ça
+#changement calcul: est-ce que c'est pareil de sommer sur les i que sur les a ?
+    def carbon_total(self, x):
+        c_tot = 0
+        for i in range(0, len(self.industry_list)):
+            carb=np.array(self.industry_list[i].carb) #on crée le vecteur correspondant (ligne)
+            col_vector=[row[i] for row in x] #on sélectionne la colonne i de la matrice
+            vecteurx=(np.array(col_vector)) #x vecteur colonne
+            c_tot += np.dot(carb,vecteurx)
+        return c_tot
+
+    def total_benef(self, x):
+        tot_benef = 0
+        for i in range(0, len(self.region_list)):
+
+            benef=np.array(self.industry_list[i].benef)
+
+            col_vector = [row[i] for row in x]  # on sélectionne la colonne i de la matrice
+            vecteurx = (np.array(col_vector))  # x vecteur colonne
+
+            tot_benef += np.dot(benef,vecteurx)
+
+        return tot_benef
+
+#normalement c'est bon
     def function(self, lbda, x):
         sum = 0
         for i in range(0, len(self.region_list)):
-            sum += (-1) * self.region_list[i].u(x[i]) + lbda * (self.carbon_total(x) - self.C)
+            sum += self.total_benef(x) + lbda * (self.carbon_total(x) - self.C)
         return sum
 
-    def D(self, ldbd):
+
+    def D(self, ldbd): #dépend des régions qui chacune a sa u (utility function)
+
         x = cp.Variable((len(self.region_list), len(self.industry_list)))
         constraints = [x >= 0]
-        for i in range(0, len(self.region_list)):
-            constraints.append((#compléter))
-
+        for a in range(0, len(self.region_list)):
+            constraints.append((self.region_list[a].u(x[a]) >= 1))
+            constraints.append((x[a][0]+x[a][1]+x[a][2] = 1))
         def f(m):
             return self.function(lbda=ldbd, x=m)
 
-        objective = cp.Minimize(f(x))
+        objective = cp.Maximize(f(x))
         prob = cp.Problem(objective, constraints)
         prob.solve()
         return x.value, f(x.value)
@@ -136,29 +144,54 @@ def utility_function(ranking, x_t_list, tho_list, x):  # ranking[i] < ranking[j]
     return sum2
 
 
-r1 = [1, 6, 2, 5, 3, 4]  # j'adore l'europe
-r2 = [6, 1, 5, 2, 4, 3]  # j'adore les us, canada...
-
+ridf = [0.03, 2, 8]  # j'adore les services
+ra = [0.2, 2, 7]
+rp = [2,1,7]
+rb = [7,3,0.5] # j'adore l'agriculture
+rpdl = [3,7,0.5]
+rc = [0.2,2,8]
 # pour tho = 0.5
 
-x_t1 = [1, 1, 5, 1, 5, 5]  # en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
-x_t2 = [3, 3, 3, 3, 3, 3]
+x_tidf = [1, 1, 5]  # en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
+x_ta = [3, 3, 3]
+x_tp = [3, 1, 2]
+x_tb = [5, 2, 1]
+x_tpdl = [3, 1, 3]
+x_tc = [1, 1, 1]
 
 
-def ugrosseregion(x):
+def uidf(x):
     t = 0.5
-    return utility_function(r1, x_t1, [t, t, t, t, t, t], x)
+    return utility_function(ridf, x_tidf, [t, t, t, t, t, t], x)
 
-
-def upetiteregion(x):
+def uauvergne(x):
     t = 0.5
-    return utility_function(r2, x_t2, [t, t, t, t, t, t], x)
+    return utility_function(ra, x_ta, [t, t, t, t, t, t], x)
+
+def uprovence(x):
+    t = 0.5
+    return utility_function(rp, x_tp, [t, t, t, t, t, t], x)
+
+def ubretagne(x):
+    t = 0.5
+    return utility_function(rb, x_tb, [t, t, t, t, t, t], x)
+
+def upaysdelaloire(x):
+    t = 0.5
+    return utility_function(rpdl, x_tpdl, [t, t, t, t, t, t], x)
+
+def ucorse(x):
+    t = 0.5
+    return utility_function(rc, x_tc, [t, t, t, t, t, t], x)
 
 #il faudrait potentiellement ajouter des caractéristiques à nos régions
 
-grosseregion = region("Grosse région", ugrosseregion, 15000)  #plus peuplée
-petiteregion = region("Petite région", upetiteregion, 100000)  #moins peuplée
-
+iledefrance = region("Ile de France", uidf, 12300000)
+auvergne = region("Auvergne", uauvergne, 8200000)
+provence = region("Provence", uprovence,5160000)
+bretagne = region("Bretagne", ubretagne,3400000)
+paysdeloire = region("Pays de la Loire",upaysdelaloire,3900000)
+corse = region("Corse", ucorse,351000)
 
 
 agriculture = industry("Agriculture", [6730953600,4487302400,2823717120,1860588800,2134204800,192078432], [16929110.55,11286073.7,7101968.329,4679591.535,5367766.76,483099.0084])
@@ -168,7 +201,7 @@ services = industry("Services", [2.99359e+11,1.99573e+11,1.25585e+11,82749686880
 
 industry_list = [agriculture, industrie, services]
 
-ens = commu([grosseregion, petiteregion], industry_list=industry_list)
+ens = commu([iledefrance, auvergne, provence, bretagne, paysdeloire, corse], industry_list=industry_list)
 
 # on a pas besoin de changer la valeur de C pour le moment. on pourra ajuster après si par ex on pense ne pas respecter
 #la cop, qu'elle est trop ambitieuse etc..
