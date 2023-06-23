@@ -119,6 +119,12 @@ class commu:
                 print("")
             print("")
 
+def show_results(minC, maxC):
+    l = [c for c in range(minC,maxC)]
+    plt.plot(l, [ens.D(100, c) for c in l])
+    plt.show()
+    
+
 
 def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
     return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2)
