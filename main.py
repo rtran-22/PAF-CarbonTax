@@ -5,8 +5,10 @@ import numpy as np
 class industry:
     def __init__(self, name, benef, carb):
         self.name = name
-        self.benef = benef #price est maintenant un vecteur (les bénéfices d'une industrie dépendent de chaque région)
+        self.benef = benef #benef est maintenant un vecteur (les bénéfices d'une industrie dépendent de chaque région)
+        # [pi,1 ... pi,6]
         self.carb = carb #carb est maintenant un vecteur
+        # [ci,1 ... ci,6]
 
 
 class region:
@@ -16,17 +18,18 @@ class region:
         self.name = name
 
 
+
 class commu:
     def __init__(self, region_list, industry_list):
         self.region_list = region_list
         self.industry_list = industry_list
 
-#changement calcul
+#changement calcul: est-ce que c'est pareil de sommer sur les i que sur les a ?
     def carbon_total(self, x):
         c_tot = 0
         for i in range(0, len(self.industry_list)):
-            carb=np.array(self.industry_list.carb) #on crée le vecteur correspondant
-            matx=np.array(x) #x
+            carb=np.array(self.industry_list.carb) #on crée le vecteur correspondant (ligne)
+            matx=(np.array(x)).T #x vecteur colonne
             c_tot += np.dot(carb,matx)
         return c_tot
 
@@ -34,9 +37,8 @@ class commu:
     def total_benef(self, product_quantities_list):
         pql = product_quantities_list
         tot_benef = 0
-        for k in range(0, len(industry_list)):
+        for k in range(0, len(self.region_list)):
             tot_benef += self.industry_list[k].benef * pql[k]
-
         return tot_benef
 
     #ajout spécifique pour calculer C
@@ -148,7 +150,7 @@ def upetiteregion(x):
     t = 0.5
     return utility_function(r2, x_t2, [t, t, t, t, t, t], x)
 
-#il faudrait potentajouter des caractéristiques à nos régions
+#il faudrait potentiellement ajouter des caractéristiques à nos régions
 
 grosseregion = region("Grosse région", ugrosseregion, 15000)  #plus peuplée
 petiteregion = region("Petite région", upetiteregion, 100000)  #moins peuplée
