@@ -35,11 +35,12 @@ class commu:
 
 #changement calcul: est-ce que c'est pareil de sommer sur les i que sur les a ?
     def carbon_total(self, x):
+        print(x)
         c_tot = 0
         for i in range(0, len(self.industry_list)):
             carb=np.array(self.industry_list[i].carb) #on crée le vecteur correspondant (ligne)
             col_vector=[row[i] for row in x] #on sélectionne la colonne i de la matrice
-            vecteurx=(np.array(col_vector)) #x vecteur colonne
+            vecteurx=(np.array(col_vector)).T #x vecteur colonne
             c_tot += np.dot(carb,vecteurx)
         return c_tot
 
@@ -50,7 +51,7 @@ class commu:
             benef = np.array(self.industry_list[i].benef)
 
             col_vector = [row[i] for row in x]  # on sélectionne la colonne i de la matrice
-            vecteurx = (np.array(col_vector))  # x vecteur colonne
+            vecteurx = (np.array(col_vector)).T  # x vecteur colonne
 
             tot_benef += np.dot(benef,vecteurx)
 
@@ -71,13 +72,13 @@ class commu:
         for a in range(0, len(self.region_list)):
             constraints.append((self.region_list[a].u(x[a]) >= 1))
             constraints.append((x[a][0]+x[a][1]+x[a][2] == 1))
-        def f(m):
-            return self.function(C=C, lbda=ldbd, x=m)
+        #def f(m):
+         #   return self.function(C=C, lbda=ldbd, x=m)
 
-        objective = cp.Minimize(f(x))
+        objective = cp.Maximize(self.function(C,ldbd,x))
         prob = cp.Problem(objective, constraints)
-        prob.solve()
-        return x.value, f(x.value)
+        value=prob.solve(solver=cp.CVXOPT)
+        return x.value, value
 
 #??
     def Dmax(self,C, min_lmbd, max_lmbd, N_val):
@@ -206,7 +207,5 @@ industry_list = [agriculture, industrie, services]
 
 ens = commu([iledefrance, auvergne, provence, bretagne, paysdeloire, corse], industry_list=industry_list)
 
-# on a pas besoin de changer la valeur de C pour le moment. on pourra ajuster après si par ex on pense ne pas respecter
-#la cop, qu'elle est trop ambitieuse etc..
 
 ens.presentation_resultat([300,400,500])
