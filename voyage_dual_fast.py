@@ -1,6 +1,8 @@
 import cvxpy as cp
 import matplotlib.pyplot as plt
 
+
+
 class product:
     def __init__(self, name, price, carb):
         self.name = name
@@ -8,24 +10,30 @@ class product:
         self.carb = carb
 
 class agent:
-    def __init__(self,name, u, budget):
+    def __init__(self,name, u, u_satisfsait, budget):
         self.u = u
         self.budget = budget
         self.name = name
         self.quantities = 0
+        self.u_satisfait = u_satisfsait
 
     def phi(self, product_quantities, product_list, lmbda):
         sum = 0
+        #print(self.name)
+        #print("product_list")
+        #print(product_list)
+        #print("product_q")
+        #print(product_quantities)
         for i in range(0, len(product_list)):
             sum += product_quantities[i]*(product_list[i].price + lmbda*product_list[i].carb)
         return sum
     
     def min_phi(self, product_list, lmbda):
         x = cp.Variable(len(product_list))
+        #print(x)
         constraints = [x >= 0]
         constraints.append(lmbda >= 0)
-        constraints.append(self.u(x) >= 1)
-        constraints.append(sum(x) == 1)
+        constraints.append(self.u(x) >= self.u_satisfait)
 
         def f(m):
             return self.phi(m, product_list, lmbda=lmbda)
@@ -91,26 +99,26 @@ class commu:
     def Dmax_fast(self, C, x0, x1, N1, N2):
         for i in range(0, N2):
             x0, x1 = self.fAux(x0, x1, N1, C)
-            if abs((x1-x0)) < 0.000001:
+            if abs((x1-x0)) < 0.0000001:
                 return (x0 + x1)/2
         return (x0 + x1)/2
     
     def presentation_resultat(self, c_list, maxL = 500, N = 100): 
         for c in c_list:
             print("===========================================\n")
-            ldbd = self.Dmax_fast(c, 0, maxL, N, 100)
+            ldbd = self.Dmax_fast(c, 0, maxL, N, 150)
             y, x = self.D(ldbd, c)
             print("")
-            print("LAMBDA = " + str(ldbd) + "; C = " + str(c) + "kg ; total carbone : " + str(self.carbon_total(x)) + "kg") 
+            print("LAMBDA = " + str(round(ldbd*1000, 10)) + "e/t ; C = " + str(c) + "kg ; total carbone : " + str(self.carbon_total(x)) + "kg") 
             for i in range(0, len(x)):
                 #print(self.agent_list[i].name + "> expenses : " + str(round(self.total_price(x[i]))) + " ; budget : " + str(round(self.agent_list[i].budget)))
                 print(self.agent_list[i].name)
 
                 for j in range(0, len(x[i])):
-                    print(self.product_list[j].name + " : " + str(round(x[i][j], 1)))
+                    print(self.product_list[j].name + " : " + str(round(x[i][j], 2)))
                 print("")
             print("")
-    
+        
     def lmbda(self, Cmin, Cmax, N_pas):
         c = []
         lbda_l = []
@@ -127,17 +135,30 @@ class commu:
         plt.xlabel("C (kg)")
         plt.ylabel("lambda ($/kg)")
         plt.show()
-    
+
+
 def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
-    return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2)
+    return (x_t + (x)*(1/(tho*tho) - 1)) ** (1/2) -(x_t)**(1/2)
+
+def p(r):
+    return 1/r
 
 def utility_function2(ranking, x_t_list, tho_list, x): #ranking[i] < ranking[j] => on prefere i à j. 
     sum2 = 0
     i = 0
     for xi in x:
-        sum2 +=  (0.9/(ranking[i])) * (simple_utility_function(x_t_list[i], tho_list[i], xi) - simple_utility_function(x_t_list[i], tho_list[i], 0))
+        sum2 +=  p(ranking[i])* (simple_utility_function(x_t_list[i], tho_list[i], xi))
+        i+=1
+    return sum2 / n0(ranking, x_t_list, tho_list)
+
+def n0(ranking, x_t_list, tho_list): #ranking[i] < ranking[j] => on prefere i à j. 
+    sum2 = 0
+    i = 0
+    for xi in x_t_list:
+        sum2 +=  p(ranking[i])*(simple_utility_function(x_t_list[i], tho_list[i], 1))
         i+=1
     return sum2
+
 
 france = product("france", 1995,887)
 us = product("us",3737,5963)
@@ -153,7 +174,7 @@ r2 = [6, 1, 5, 2, 4, 3] #j'adore les us, canada...
 r3 = [1, 1, 1, 1, 1, 1] #je m'en moque
 
 #pour tho = 0.5
-N = 8 #je m'en lasse pas !
+N = 2 #je m'en lasse pas !
 
 x_t1 = [(N), 1, 1, 1, 1, 1] #en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
 x_t2 = [1, (N), 1, 1, 1, 1]
@@ -173,13 +194,13 @@ def u3(x):
     return utility_function2(r3, x_t3, [t,t,t,t,t,t], x)
 
 
-agent_europe = agent("M. Europe", u1, 15000) #moins riche
-agent_us = agent("Mme. US", u2, 100000) #riche
-agent_sp = agent("M. ???", u3, 100000)
+agent_europe = agent("M. Europe", u1, 0.6, 10000) #moins riche
+agent_us = agent("Mme. US", u2, 0.8, 10000) #met du temps à être satisfait
+agent_sp = agent("M. ???", u3, 0.6, 10000) #
 ens = commu([agent_europe, agent_us, agent_sp], product_list=product_list)
 
-INFINI = 100000000
 cop = 3 * 2000
+#ens.presentation_resultat([7500, 7600, 7800, 7900, 8000, 8100, 10000])
+ens.presentation_resultat([19000, 1000000])
 
-#ens.presentation_resultat([INFINI, cop, cop*1.5, cop*3])
-ens.lmbda(6000, 7000, 75)
+#ens.lmbda(6000, 7000, 75)
