@@ -115,11 +115,7 @@ class commu:
                 print(self.agent_list[i].name)
 
                 for j in range(0, len(x[i])):
-<<<<<<< HEAD:voyage2.py
                     print(self.product_list[j].name + " : " + str(round(abs(x[i][j]), 1)))
-=======
-                    print(self.product_list[j].name + " : " + str(round(x[i][j], 2)))
->>>>>>> origin/raphaelb:voyage_dual_fast.py
                 print("")
             print("")
         
@@ -139,11 +135,6 @@ class commu:
         plt.xlabel("C (kg)")
         plt.ylabel("lambda ($/kg)")
         plt.show()
-<<<<<<< HEAD:voyage2.py
-    
-def simple_utility_function(x_t, tau, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tau fois moins utile que la premiere
-    return x_t*(1 + (x/x_t)*(1/(tau*tau) - 1)) ** (1/2)
-=======
 
 
 def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
@@ -151,15 +142,11 @@ def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle u
 
 def p(r):
     return 1/r
->>>>>>> origin/raphaelb:voyage_dual_fast.py
 
 def utility_function2(ranking, x_t_list, tau_list, x): #ranking[i] < ranking[j] => on prefere i à j. 
     sum2 = 0
     i = 0
     for xi in x:
-<<<<<<< HEAD:voyage2.py
-        sum2 +=  (0.9/(ranking[i])) * (simple_utility_function(x_t_list[i], tau_list[i], xi) - simple_utility_function(x_t_list[i], tau_list[i], 0))
-=======
         sum2 +=  p(ranking[i])* (simple_utility_function(x_t_list[i], tho_list[i], xi))
         i+=1
     return sum2 / n0(ranking, x_t_list, tho_list)
@@ -169,7 +156,6 @@ def n0(ranking, x_t_list, tho_list): #ranking[i] < ranking[j] => on prefere i à
     i = 0
     for xi in x_t_list:
         sum2 +=  p(ranking[i])*(simple_utility_function(x_t_list[i], tho_list[i], 1))
->>>>>>> origin/raphaelb:voyage_dual_fast.py
         i+=1
     return sum2
 
@@ -187,13 +173,8 @@ r1 = [1, 6, 2, 5, 3, 4] #j'adore l'europe
 r2 = [6, 1, 5, 2, 4, 3] #j'adore les us, canada...
 r3 = [1, 1, 1, 1, 1, 1] #je m'en moque
 
-<<<<<<< HEAD:voyage2.py
-#pour tau = 0.5
-N = 8 #je m'en lasse pas !
-=======
 #pour tho = 0.5
 N = 2 #je m'en lasse pas !
->>>>>>> origin/raphaelb:voyage_dual_fast.py
 
 x_t1 = [(N), 1, 1, 1, 1, 1] #en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
 x_t2 = [1, (N), 1, 1, 1, 1]
@@ -222,8 +203,4 @@ cop = 3 * 2000
 #ens.presentation_resultat([7500, 7600, 7800, 7900, 8000, 8100, 10000])
 ens.presentation_resultat([19000, 1000000])
 
-<<<<<<< HEAD:voyage2.py
-ens.presentation_resultat([INFINI, cop, cop*1.2, cop*3])
-=======
->>>>>>> origin/raphaelb:voyage_dual_fast.py
 #ens.lmbda(6000, 7000, 75)
