@@ -16,7 +16,7 @@ class region:
         self.u = u
         self.population = population
         self.name = name
-
+        #self.carb
 
 
 class commu:
@@ -24,51 +24,53 @@ class commu:
         self.region_list = region_list
         self.industry_list = industry_list
 
-#changement calcul: est-ce que c'est pareil de sommer sur les i que sur les a ?
-    def carbon_total(self, x):
-        c_tot = 0
-        for i in range(0, len(self.industry_list)):
-            carb=np.array(self.industry_list.carb) #on crée le vecteur correspondant (ligne)
-            matx=(np.array(x)).T #x vecteur colonne
-            c_tot += np.dot(carb,matx)
-        return c_tot
-
-    # changement calcul
-    def total_benef(self, product_quantities_list):
-        pql = product_quantities_list
-        tot_benef = 0
-        for k in range(0, len(self.region_list)):
-            tot_benef += self.industry_list[k].benef * pql[k]
-        return tot_benef
-
     #ajout spécifique pour calculer C
     def C(self):
         COP=2 #on met C en tonnes ou en kg?
+        s=0
         for i in range(0, len(self.region_list)):
-            COP*=self.region_list[i].population
+            s+=self.region_list[i].population
+        COP*=s
+        return COP
 
-    def function(self, lbda, x):
-        sum = 0
-        for i in range(0, len(self.region_list)):
-            sum += (-1) * self.region_list[i].u(x[i]) + lbda * (self.carbon_total(x) - self.C)
+#changement calcul: est-ce que c'est pareil de sommer sur les i que sur les a ?
+    def carbon_total(self, x):
+        carbon_array = np.empty(len(self.industry_list))
+        for r in range(0, len(self.industry_list)):
+            np.append(carbon_array,x[r]@self.industry_list[r].carb)
+        return carbon_array
+
+    def total_benef(self, x):
+        print(len(self.industry_list[0].benef))
+        benef_array = np.empty(len(self.industry_list)) 
+        for i in range(0, len(self.industry_list)):
+
+            np.append(benef_array,x[i]@self.industry_list[i].benef)
+        return benef_array
+
+#normalement c'est bon
+    def function(self,C, lbda, x):
+        sum = cp.sum(self.total_benef(x)) + lbda * (cp.sum(self.carbon_total(x)) - C)
         return sum
 
-    def D(self, ldbd):
+
+    def D(self, ldbd,C): #dépend des régions qui chacune a sa u (utility function)
+
         x = cp.Variable((len(self.region_list), len(self.industry_list)))
         constraints = [x >= 0]
-        #for i in range(0, len(self.region_list)):
-        #    constraints.append((#compléter))
+        for a in range(0, len(self.region_list)):
+            constraints.append((self.region_list[a].u(x[a]) >= 1))
+            constraints.append((x[a][0]+x[a][1]+x[a][2] == 1))
+        #def f(m):
+         #   return self.function(C=C, lbda=ldbd, x=m)
 
-        def f(m):
-            return self.function(lbda=ldbd, x=m)
-
-        objective = cp.Maximize(f(x))
+        objective = cp.Maximize(self.function(C,ldbd,x))
         prob = cp.Problem(objective, constraints)
-        prob.solve()
-        return x.value, f(x.value)
+        value=prob.solve(solver=cp.CVXOPT)
+        return x.value, value
 
 #??
-    def Dmax(self,min_lmbd, max_lmbd, N_val):
+    def Dmax(self,C, min_lmbd, max_lmbd, N_val):
         x = [min_lmbd + (max_lmbd - min_lmbd) * i / N_val for i in range(0, N_val - 1)]
         x_max = 0
         y_max = -100000000000000000000000
@@ -78,56 +80,53 @@ class commu:
             if (True) & (tmp != round(i * 100 / len(x))):
                 tmp = round(i * 100 / len(x))
                 print(str(tmp / 100) + "%")
-            x_val, y = ens.D(x[i], self.C)
+            x_val, y = ens.D(x[i],C)
             if y_max <= y:
                 print(x[i])
                 y_max = y
                 x_max = x[i]
-        return x_max, y_max
+        return x_max, y_max #lambda max et D(lambda max)
 
 
-    def fAux(self, x0, x1, N, C):  # ????
+    def fAux(self, x0, x1, N, C):  # pas N
         x = [x0 + (x1 - x0) * i / N for i in range(0, N + 1)]
         y_tmp = -10000000
         for i in range(0, len(x)):
-            x_val, y = ens.D(x[i], C)
-            if (y_tmp - y) >= 0:
-                return x[i - 1], x[i]
+            x_val, y = ens.D(x[i],C)
+            if (y_tmp - y) >= 0: #on regarde qd la dérivée change de signe
+                return x[i - 1], x[i] #encadrement de lambda max
             else:
                 y_tmp = y
         return x[N - 1], x[N - 1]
 
-    def Dmax_fast(self, x0, x1, N1, N2):
+    def Dmax_fast(self,C, x0, x1, N1, N2):
         for i in range(0, N2):
-            x0, x1 = self.fAux(x0, x1, N1, self.C)
+            x0, x1 = self.fAux(x0, x1, N1, C)
             if abs((x1 - x0)) < 0.00001:
-                return (x0 + x1) / 2
+                return (x0 + x1) / 2  #dichotomie pr trouver bon lambda max
         return (x0 + x1) / 2
 
-    def presentation_resultat(self, maxL=10, N=1000 * 2):  # plus de paramètre puisqu'on a fixé C
+    def presentation_resultat(self, c_list, maxL=10, N=1000 * 2):  #paramètre C_list
+        for c in c_list:
             print("===========================================\n")
-            ldbd = self.Dmax_fast(0, maxL, N, 400)
-            x, y = self.D(ldbd)
+            ldbd = self.Dmax_fast(c,0, maxL, N, 400)
+            x, y = self.D(ldbd,c)
             print("")
-            print("LAMBDA = " + str(ldbd) + "; C = " + str(self.C) + "kg ; total carbone : " + str(
+            print("LAMBDA = " + str(ldbd) + "; C = " + str(c) + "kg ; total carbone : " + str(
                 self.carbon_total(x)) + "kg")
             for i in range(0, len(x)):
-                print(self.region_list[i].name + "> expenses : " + str(
-                    round(self.total_benef(x[i]))) + " ; budget : " + str(round(self.region_list[i].budget)))
+                print(self.region_list[i].name + "> investissements : " + str(
+                    round(self.total_benef(x[i]))) + " ; population : " + str(round(self.region_list[i].population)))
                 for j in range(0, len(x[i])):
                     print(self.industry_list[j].name + " : " + str(round(x[i][j], 1)))
                 print("")
             print("")
 
-def show_results(minC, maxC):
-    l = [c for c in range(minC,maxC)]
-    plt.plot(l, [ens.D(100, c) for c in l])
-    plt.show()
-    
-
 
 def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
-    return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2)
+    return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2) #x_t moment où t'en as marre de consommer
+
+#
 
 def utility_function(ranking, x_t_list, tho_list, x):  # ranking[i] < ranking[j] => on prefere i à j.
     sum2 = 0.0
@@ -139,7 +138,7 @@ def utility_function(ranking, x_t_list, tho_list, x):  # ranking[i] < ranking[j]
 
 
 ridf = [0.03, 2, 8]  # j'adore les services
-ra = [0.2, 2, 7] 
+ra = [0.2, 2, 7]
 rp = [2,1,7]
 rb = [7,3,0.5] # j'adore l'agriculture
 rpdl = [3,7,0.5]
@@ -152,6 +151,7 @@ x_tp = [3, 1, 2]
 x_tb = [5, 2, 1]
 x_tpdl = [3, 1, 3]
 x_tc = [1, 1, 1]
+
 
 def uidf(x):
     t = 0.5
@@ -179,7 +179,7 @@ def ucorse(x):
 
 #il faudrait potentiellement ajouter des caractéristiques à nos régions
 
-iledefrance = region("Ile de France", uidf, 12300000) 
+iledefrance = region("Ile de France", uidf, 12300000)
 auvergne = region("Auvergne", uauvergne, 8200000)
 provence = region("Provence", uprovence,5160000)
 bretagne = region("Bretagne", ubretagne,3400000)
@@ -196,7 +196,5 @@ industry_list = [agriculture, industrie, services]
 
 ens = commu([iledefrance, auvergne, provence, bretagne, paysdeloire, corse], industry_list=industry_list)
 
-# on a pas besoin de changer la valeur de C pour le moment. on pourra ajuster après si par ex on pense ne pas respecter
-#la cop, qu'elle est trop ambitieuse etc..
 
-ens.presentation_resultat()
+ens.presentation_resultat([300,400,500])
