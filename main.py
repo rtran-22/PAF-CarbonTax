@@ -45,9 +45,9 @@ class commu:
 
     def total_benef(self, x):
         tot_benef = 0
-        for i in range(0, len(self.region_list)):
+        for i in range(0, len(self.industry_list)):
 
-            benef=np.array(self.industry_list[i].benef)
+            benef = np.array(self.industry_list[i].benef)
 
             col_vector = [row[i] for row in x]  # on sélectionne la colonne i de la matrice
             vecteurx = (np.array(col_vector))  # x vecteur colonne
@@ -57,30 +57,30 @@ class commu:
         return tot_benef
 
 #normalement c'est bon
-    def function(self, lbda, x):
+    def function(self,C, lbda, x):
         sum = 0
         for i in range(0, len(self.region_list)):
-            sum += self.total_benef(x) + lbda * (self.carbon_total(x) - self.C)
+            sum += self.total_benef(x) + lbda * (self.carbon_total(x) - C)
         return sum
 
 
-    def D(self, ldbd): #dépend des régions qui chacune a sa u (utility function)
+    def D(self, ldbd,C): #dépend des régions qui chacune a sa u (utility function)
 
         x = cp.Variable((len(self.region_list), len(self.industry_list)))
         constraints = [x >= 0]
         for a in range(0, len(self.region_list)):
             constraints.append((self.region_list[a].u(x[a]) >= 1))
-            constraints.append((x[a][0]+x[a][1]+x[a][2] = 1))
+            constraints.append((x[a][0]+x[a][1]+x[a][2] == 1))
         def f(m):
-            return self.function(lbda=ldbd, x=m)
+            return self.function(C=C, lbda=ldbd, x=m)
 
-        objective = cp.Maximize(f(x))
+        objective = cp.Minimize(f(x))
         prob = cp.Problem(objective, constraints)
         prob.solve()
         return x.value, f(x.value)
 
 #??
-    def Dmax(self,min_lmbd, max_lmbd, N_val):
+    def Dmax(self,C, min_lmbd, max_lmbd, N_val):
         x = [min_lmbd + (max_lmbd - min_lmbd) * i / N_val for i in range(0, N_val - 1)]
         x_max = 0
         y_max = -100000000000000000000000
@@ -90,42 +90,43 @@ class commu:
             if (True) & (tmp != round(i * 100 / len(x))):
                 tmp = round(i * 100 / len(x))
                 print(str(tmp / 100) + "%")
-            x_val, y = ens.D(x[i], self.C)
+            x_val, y = ens.D(x[i],C)
             if y_max <= y:
                 print(x[i])
                 y_max = y
                 x_max = x[i]
-        return x_max, y_max
+        return x_max, y_max #lambda max et D(lambda max)
 
 
-    def fAux(self, x0, x1, N, C):  # ????
+    def fAux(self, x0, x1, N, C):  # pas N
         x = [x0 + (x1 - x0) * i / N for i in range(0, N + 1)]
         y_tmp = -10000000
         for i in range(0, len(x)):
-            x_val, y = ens.D(x[i], C)
-            if (y_tmp - y) >= 0:
-                return x[i - 1], x[i]
+            x_val, y = ens.D(x[i],C)
+            if (y_tmp - y) >= 0: #on regarde qd la dérivée change de signe
+                return x[i - 1], x[i] #encadrement de lambda max
             else:
                 y_tmp = y
         return x[N - 1], x[N - 1]
 
-    def Dmax_fast(self, x0, x1, N1, N2):
+    def Dmax_fast(self,C, x0, x1, N1, N2):
         for i in range(0, N2):
-            x0, x1 = self.fAux(x0, x1, N1, self.C)
+            x0, x1 = self.fAux(x0, x1, N1, C)
             if abs((x1 - x0)) < 0.00001:
-                return (x0 + x1) / 2
+                return (x0 + x1) / 2  #dichotomie pr trouver bon lambda max
         return (x0 + x1) / 2
 
-    def presentation_resultat(self, maxL=10, N=1000 * 2):  # plus de paramètre puisqu'on a fixé C
+    def presentation_resultat(self, c_list, maxL=10, N=1000 * 2):  #paramètre C_list
+        for c in c_list:
             print("===========================================\n")
-            ldbd = self.Dmax_fast(0, maxL, N, 400)
-            x, y = self.D(ldbd)
+            ldbd = self.Dmax_fast(c,0, maxL, N, 400)
+            x, y = self.D(ldbd,c)
             print("")
-            print("LAMBDA = " + str(ldbd) + "; C = " + str(self.C) + "kg ; total carbone : " + str(
+            print("LAMBDA = " + str(ldbd) + "; C = " + str(c) + "kg ; total carbone : " + str(
                 self.carbon_total(x)) + "kg")
             for i in range(0, len(x)):
-                print(self.region_list[i].name + "> expenses : " + str(
-                    round(self.total_benef(x[i]))) + " ; budget : " + str(round(self.region_list[i].budget)))
+                print(self.region_list[i].name + "> investissements : " + str(
+                    round(self.total_benef(x[i]))) + " ; population : " + str(round(self.region_list[i].population)))
                 for j in range(0, len(x[i])):
                     print(self.industry_list[j].name + " : " + str(round(x[i][j], 1)))
                 print("")
@@ -133,7 +134,9 @@ class commu:
 
 
 def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
-    return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2)
+    return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2) #x_t moment où t'en as marre de consommer
+
+#
 
 def utility_function(ranking, x_t_list, tho_list, x):  # ranking[i] < ranking[j] => on prefere i à j.
     sum2 = 0.0
@@ -206,4 +209,4 @@ ens = commu([iledefrance, auvergne, provence, bretagne, paysdeloire, corse], ind
 # on a pas besoin de changer la valeur de C pour le moment. on pourra ajuster après si par ex on pense ne pas respecter
 #la cop, qu'elle est trop ambitieuse etc..
 
-ens.presentation_resultat()
+ens.presentation_resultat([300,400,500])
