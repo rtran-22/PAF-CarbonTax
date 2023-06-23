@@ -107,7 +107,7 @@ class commu:
                 print(self.agent_list[i].name)
 
                 for j in range(0, len(x[i])):
-                    print(self.product_list[j].name + " : " + str(round(x[i][j], 1)))
+                    print(self.product_list[j].name + " : " + str(round(abs(x[i][j]), 1)))
                 print("")
             print("")
     
@@ -128,14 +128,14 @@ class commu:
         plt.ylabel("lambda ($/kg)")
         plt.show()
     
-def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
-    return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2)
+def simple_utility_function(x_t, tau, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tau fois moins utile que la premiere
+    return x_t*(1 + (x/x_t)*(1/(tau*tau) - 1)) ** (1/2)
 
-def utility_function2(ranking, x_t_list, tho_list, x): #ranking[i] < ranking[j] => on prefere i à j. 
+def utility_function2(ranking, x_t_list, tau_list, x): #ranking[i] < ranking[j] => on prefere i à j. 
     sum2 = 0
     i = 0
     for xi in x:
-        sum2 +=  (0.9/(ranking[i])) * (simple_utility_function(x_t_list[i], tho_list[i], xi) - simple_utility_function(x_t_list[i], tho_list[i], 0))
+        sum2 +=  (0.9/(ranking[i])) * (simple_utility_function(x_t_list[i], tau_list[i], xi) - simple_utility_function(x_t_list[i], tau_list[i], 0))
         i+=1
     return sum2
 
@@ -152,7 +152,7 @@ r1 = [1, 6, 2, 5, 3, 4] #j'adore l'europe
 r2 = [6, 1, 5, 2, 4, 3] #j'adore les us, canada...
 r3 = [1, 1, 1, 1, 1, 1] #je m'en moque
 
-#pour tho = 0.5
+#pour tau = 0.5
 N = 8 #je m'en lasse pas !
 
 x_t1 = [(N), 1, 1, 1, 1, 1] #en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
@@ -181,5 +181,5 @@ ens = commu([agent_europe, agent_us, agent_sp], product_list=product_list)
 INFINI = 100000000
 cop = 3 * 2000
 
-#ens.presentation_resultat([INFINI, cop, cop*1.5, cop*3])
-ens.lmbda(6000, 7000, 75)
+ens.presentation_resultat([INFINI, cop, cop*1.2, cop*3])
+#ens.lmbda(6000, 7000, 75)
