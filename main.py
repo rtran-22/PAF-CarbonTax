@@ -29,11 +29,11 @@ class commu:
         c_tot = 0
         for i in range(0, len(self.industry_list)):
             carb=np.array(self.industry_list.carb) #on crée le vecteur correspondant (ligne)
-            matx=(np.array(x)).T #x vecteur colonne
-            c_tot += np.dot(carb,matx)
+            vecteurx=(np.array(x)).T #x vecteur colonne
+            c_tot += np.dot(carb,vecteurx)
         return c_tot
 
-    # changement calcul
+    # ça
     def total_benef(self, product_quantities_list):
         pql = product_quantities_list
         tot_benef = 0
@@ -44,9 +44,13 @@ class commu:
     #ajout spécifique pour calculer C
     def C(self):
         COP=2 #on met C en tonnes ou en kg?
+        s=0
         for i in range(0, len(self.region_list)):
-            COP*=self.region_list[i].population
+            s+=self.region_list[i].population
+        COP*=s
+        return COP
 
+#ça
     def function(self, lbda, x):
         sum = 0
         for i in range(0, len(self.region_list)):
