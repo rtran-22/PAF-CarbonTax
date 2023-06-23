@@ -1,0 +1,104 @@
+===========================================
+
+
+LAMBDA = 0.0025003125; C = 5000kg ; total carbone : 1774.0000001463538kg
+M. Europe> expenses : 1995 ; budget : 15000
+france : 1.0
+us : 0.0
+germany : 0.0
+canada : 0.0
+switzerland : 0.0
+japan : 0.0
+
+Mme. US> expenses : 1995 ; budget : 100000
+france : 1.0
+us : 0.0
+germany : 0.0
+canada : 0.0
+switzerland : 0.0
+japan : 0.0
+
+
+===========================================
+
+
+LAMBDA = 0.0001953125; C = 7000kg ; total carbone : 6997.700619766154kg
+M. Europe> expenses : 15000 ; budget : 15000
+france : 5.6
+us : 0.0
+germany : 0.0
+canada : 0.0
+switzerland : 1.1
+japan : 0.0
+
+Mme. US> expenses : 3354 ; budget : 100000
+france : 0.1
+us : 0.0
+germany : 0.0
+canada : 0.0
+switzerland : 0.9
+japan : 0.0
+
+
+===========================================
+
+
+LAMBDA = 0.00012593750000000002; C = 9000kg ; total carbone : 8939.347151468153kg
+M. Europe> expenses : 15000 ; budget : 15000
+france : 6.0
+us : 0.0
+germany : 0.9
+canada : 0.0
+switzerland : 0.4
+japan : 0.0
+
+Mme. US> expenses : 5350 ; budget : 100000
+france : 0.3
+us : 0.0
+germany : 0.0
+canada : 0.0
+switzerland : 1.4
+japan : 0.0
+
+
+===========================================
+
+
+LAMBDA = 0.00012031249999999999; C = 10000kg ; total carbone : 9966.156432226242kg
+M. Europe> expenses : 15000 ; budget : 15000
+france : 6.0
+us : 0.0
+germany : 1.0
+canada : 0.0
+switzerland : 0.3
+japan : 0.0
+
+Mme. US> expenses : 6732 ; budget : 100000
+france : 0.4
+us : 0.1
+germany : 0.0
+canada : 0.0
+switzerland : 1.6
+japan : 0.0
+
+
+===========================================
+
+
+LAMBDA = 3.125e-07; C = 1000000000kg ; total carbone : 161432.10103253202kg
+M. Europe> expenses : 15000 ; budget : 15000
+france : 3.8
+us : 0.0
+germany : 3.7
+canada : 0.0
+switzerland : 0.0
+japan : 0.0
+
+Mme. US> expenses : 100000 ; budget : 100000
+france : 1.0
+us : 19.6
+germany : 2.0
+canada : 4.5
+switzerland : 0.5
+japan : 0.5
+
