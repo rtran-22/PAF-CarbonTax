@@ -12,11 +12,12 @@ class industry:
 
 
 class region:
-    def __init__(self, name, u, population): #u fonction d'utilité de la région
+    def __init__(self, name, u, population,benef,carb): #u fonction d'utilité de la région
         self.u = u
         self.population = population
         self.name = name
-        #self.carb
+        self.carb=carb
+        self.benef=benef
 
 
 class commu:
@@ -33,19 +34,18 @@ class commu:
         COP*=s
         return COP
 
-#changement calcul: est-ce que c'est pareil de sommer sur les i que sur les a ?
+#calcul des sommes, on crée un vecteur de coefficient x[région]@benef[region] pour chaque secteur d'activité
     def carbon_total(self, x):
-        carbon_array = np.empty(len(self.industry_list))
-        for r in range(0, len(self.industry_list)):
-            np.append(carbon_array,x[r]@self.industry_list[r].carb)
+        carbon_array = np.array([])
+        for r in range(0, len(self.region_list)):
+            carbon_array =np.append(carbon_array,x[r]@self.region_list[r].carb)
         return carbon_array
 
     def total_benef(self, x):
-        print(len(self.industry_list[0].benef))
-        benef_array = np.empty(len(self.industry_list)) 
-        for i in range(0, len(self.industry_list)):
-
-            np.append(benef_array,x[i]@self.industry_list[i].benef)
+        benef_array = np.array([])
+        for r in range(0, len(self.region_list)):
+            benef_array =np.append(benef_array,x[r]@self.region_list[r].benef)
+            print(benef_array)
         return benef_array
 
 #normalement c'est bon
@@ -179,16 +179,16 @@ def ucorse(x):
 
 #il faudrait potentiellement ajouter des caractéristiques à nos régions
 
-iledefrance = region("Ile de France", uidf, 12300000)
-auvergne = region("Auvergne", uauvergne, 8200000)
-provence = region("Provence", uprovence,5160000)
-bretagne = region("Bretagne", ubretagne,3400000)
-paysdeloire = region("Pays de la Loire",upaysdelaloire,3900000)
-corse = region("Corse", ucorse,351000)
+iledefrance = region("Ile de France", uidf, 12300000, [6730953600,1.08495E+11,2.99359e+11],[16929110.55,23979872.72,10834630.75])
+auvergne = region("Auvergne", uauvergne, 8200000,[4487302400,72329705560,1.99573e+11],[11286073.7,23979872.72,7223087.169])
+provence = region("Provence", uprovence,5160000,[2823717120,45514790328,1.25585e+11],[7101968.329,15089773.57,4545259.731])
+bretagne = region("Bretagne", ubretagne,3400000,[1860588800,29990365720,82749686880],[4679591.535,9942874.057,2994938.582])
+paysdeloire = region("Pays de la Loire",upaysdelaloire,3900000,[2134204800,34400713620,94918758480],[5367766.76,11405061.42,3435370.727])
+corse = region("Corse", ucorse,351000,[192078432,3096064226,8542688263],[483099.0084,1026455.528,309183.3654])
 
 
 agriculture = industry("Agriculture", [6730953600,4487302400,2823717120,1860588800,2134204800,192078432], [16929110.55,11286073.7,7101968.329,4679591.535,5367766.76,483099.0084])
-industrie = industry("Industrie", [72329705560,72329705560,45514790328,29990365720,34400713620,3096064226], [23979872.72,23979872.72,15089773.57,9942874.057,11405061.42,1026455.528])
+industrie = industry("Industrie", [1.08495E+11,72329705560,45514790328,29990365720,34400713620,3096064226], [23979872.72,23979872.72,15089773.57,9942874.057,11405061.42,1026455.528])
 services = industry("Services", [2.99359e+11,1.99573e+11,1.25585e+11,82749686880,94918758480,8542688263], [10834630.75,7223087.169,4545259.731,2994938.582,3435370.727,309183.3654])
 
 
