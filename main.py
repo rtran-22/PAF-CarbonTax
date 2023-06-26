@@ -23,7 +23,6 @@ class region:
         sum = 0
         for i in range(0, len(industry_list)):
             print(i)
-            print(product_quantities[i])
         
             sum += product_quantities[i]*(self.benef[i] + lmbda*self.carb[i])
         return sum
@@ -41,9 +40,14 @@ class region:
         objective = cp.Maximize(f(x))
         prob = cp.Problem(objective, constraints)
         prob.solve(solver=cp.CVXOPT)
+        result = prob.solve(solver=cp.CVXOPT)
+    
+        if result is not None:
+            return (x.value, f(x.value))
+        else:
+        # Gérer l'échec de la résolution du problème d'optimisation
+            return None
         #print(x.value)
-        return (x.value, f(x.value))
-
 
 class commu:
     def __init__(self, region_list, industry_list):
@@ -67,6 +71,7 @@ class commu:
             x, y = self.region_list[j].min_phi(self.industry_list, ldbd)
             sum = sum + y
             l.append(x)
+        print(sum - ldbd*C)
         return (sum - ldbd*C), l
 
 #??
@@ -85,6 +90,7 @@ class commu:
                 print(x[i])
                 y_max = y
                 x_max = x[i]
+        
         return x_max, y_max #lambda max et D(lambda max)
 
 
@@ -107,7 +113,8 @@ class commu:
         return (x0 + x1) / 2
 
     def presentation_resultat(self, c_list, maxL=10, N=1000 * 2):  #paramètre C_list
-        for c in c_list:
+        self.D(10,c_list[len(c_list)-1])
+        """ for c in c_list:
             print("===========================================\n")
             ldbd = self.Dmax_fast(c,0, maxL, N, 400)
             x, y = self.D(ldbd,c)
@@ -120,7 +127,7 @@ class commu:
                 for j in range(0, len(x[i])):
                     print(self.industry_list[j].name + " : " + str(round(x[i][j], 1)))
                 print("")
-            print("")
+            print("") """
 
 
 def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
