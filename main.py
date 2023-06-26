@@ -18,6 +18,31 @@ class region:
         self.name = name
         self.carb=carb
         self.benef=benef
+    
+    def phi(self, product_quantities, industry_list, lmbda):
+        sum = 0
+        for i in range(0, len(industry_list)):
+            print(i)
+            print(product_quantities[i])
+        
+            sum += product_quantities[i]*(self.benef[i] + lmbda*self.carb[i])
+        return sum
+    
+    def min_phi(self, industry_list, lmbda):
+        x = cp.Variable(len(industry_list))
+        #print(x)
+        constraints = [x >= 0]
+        constraints.append(self.u(x) >= 1)
+        constraints.append((x[0]+x[1]+x[2] == 1))
+
+        def f(m):
+            return self.phi(m, industry_list, lmbda)
+        
+        objective = cp.Maximize(f(x))
+        prob = cp.Problem(objective, constraints)
+        prob.solve(solver=cp.CVXOPT)
+        #print(x.value)
+        return (x.value, f(x.value))
 
 
 class commu:
@@ -35,39 +60,14 @@ class commu:
         return COP
 
 #calcul des sommes, on crée un vecteur de coefficient x[région]@benef[region] pour chaque secteur d'activité
-    def carbon_total(self, x):
-        carbon_array = np.array([])
-        for r in range(0, len(self.region_list)):
-            carbon_array =np.append(carbon_array,x[r]@self.region_list[r].carb)
-        return carbon_array
-
-    def total_benef(self, x):
-        benef_array = np.array([])
-        for r in range(0, len(self.region_list)):
-            benef_array =np.append(benef_array,x[r]@self.region_list[r].benef)
-            print(benef_array)
-        return benef_array
-
-#normalement c'est bon
-    def function(self,C, lbda, x):
-        sum = cp.sum(self.total_benef(x)) + lbda * (cp.sum(self.carbon_total(x)) - C)
-        return sum
-
-
     def D(self, ldbd,C): #dépend des régions qui chacune a sa u (utility function)
-
-        x = cp.Variable((len(self.region_list), len(self.industry_list)))
-        constraints = [x >= 0]
-        for a in range(0, len(self.region_list)):
-            constraints.append((self.region_list[a].u(x[a]) >= 1))
-            constraints.append((x[a][0]+x[a][1]+x[a][2] == 1))
-        #def f(m):
-         #   return self.function(C=C, lbda=ldbd, x=m)
-
-        objective = cp.Maximize(self.function(C,ldbd,x))
-        prob = cp.Problem(objective, constraints)
-        value=prob.solve(solver=cp.CVXOPT)
-        return x.value, value
+        sum = 0
+        l = []
+        for j in range(0, len(self.region_list)):
+            x, y = self.region_list[j].min_phi(self.industry_list, ldbd)
+            sum = sum + y
+            l.append(x)
+        return (sum - ldbd*C), l
 
 #??
     def Dmax(self,C, min_lmbd, max_lmbd, N_val):
@@ -112,8 +112,8 @@ class commu:
             ldbd = self.Dmax_fast(c,0, maxL, N, 400)
             x, y = self.D(ldbd,c)
             print("")
-            print("LAMBDA = " + str(ldbd) + "; C = " + str(c) + "kg ; total carbone : " + str(
-                self.carbon_total(x)) + "kg")
+            #print("LAMBDA = " + str(ldbd) + "; C = " + str(c) + "kg ; total carbone : " + str(
+                #self.carbon_total(x)) + "kg")
             for i in range(0, len(x)):
                 print(self.region_list[i].name + "> investissements : " + str(
                     round(self.total_benef(x[i]))) + " ; population : " + str(round(self.region_list[i].population)))
@@ -127,7 +127,8 @@ def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle u
     return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2) #x_t moment où t'en as marre de consommer
 
 #
-
+def utility_function_bis(ranking, x_t_list,tho_list,x):
+    return
 def utility_function(ranking, x_t_list, tho_list, x):  # ranking[i] < ranking[j] => on prefere i à j.
     sum2 = 0.0
     i = 0
