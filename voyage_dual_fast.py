@@ -137,8 +137,8 @@ class commu:
         plt.show()
 
 
-def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
-    return (x_t + (x)*(1/(tho*tho) - 1)) ** (1/2) -(x_t)**(1/2)
+def simple_utility_function(x_t, tau, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tau fois moins utile que la premiere
+    return (x_t + (x)*(1/(tau*tau) - 1)) ** (1/2) -(x_t)**(1/2)
 
 def p(r):
     return 1/r
@@ -147,15 +147,15 @@ def utility_function2(ranking, x_t_list, tau_list, x): #ranking[i] < ranking[j] 
     sum2 = 0
     i = 0
     for xi in x:
-        sum2 +=  p(ranking[i])* (simple_utility_function(x_t_list[i], tho_list[i], xi))
+        sum2 +=  p(ranking[i])* (simple_utility_function(x_t_list[i], tau_list[i], xi))
         i+=1
-    return sum2 / n0(ranking, x_t_list, tho_list)
+    return sum2 / n0(ranking, x_t_list, tau_list)
 
-def n0(ranking, x_t_list, tho_list): #ranking[i] < ranking[j] => on prefere i à j. 
+def n0(ranking, x_t_list, tau_list): #ranking[i] < ranking[j] => on prefere i à j. 
     sum2 = 0
     i = 0
     for xi in x_t_list:
-        sum2 +=  p(ranking[i])*(simple_utility_function(x_t_list[i], tho_list[i], 1))
+        sum2 +=  p(ranking[i])*(simple_utility_function(x_t_list[i], tau_list[i], 1))
         i+=1
     return sum2
 
@@ -173,7 +173,7 @@ r1 = [1, 6, 2, 5, 3, 4] #j'adore l'europe
 r2 = [6, 1, 5, 2, 4, 3] #j'adore les us, canada...
 r3 = [1, 1, 1, 1, 1, 1] #je m'en moque
 
-#pour tho = 0.5
+#pour tau = 0.5
 N = 2 #je m'en lasse pas !
 
 x_t1 = [(N), 1, 1, 1, 1, 1] #en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
