@@ -1,0 +1,169 @@
+LAMBDA = 495000.0e/t ; C = 6000kg ; total carbone : 6372.064772869744kg
+M. Europe
+france : 1.0
+us : 0.0
+germany : 0.0
+canada : 0.0
+switzerland : 0.0
+japan : 0.0
+
+Mme. US
+france : -0.0
+us : 0.7
+germany : 0.0
+canada : 0.0
+switzerland : 0.3
+japan : 0.0
+
+M. ???
+france : 0.9
+us : -0.0
+germany : -0.0
+canada : -0.0
+switzerland : 0.1
+japan : -0.0
+
+
+===========================================
+
+
+LAMBDA = 200.0e/t ; C = 6600.000000000001kg ; total carbone : 6595.193974624323kg
+M. Europe
+france : 1.0
+us : -0.0
+germany : 0.0
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+Mme. US
+france : 0.2
+us : 0.7
+germany : 0.1
+canada : -0.0
+switzerland : 0.0
+japan : -0.0
+
+M. ???
+france : 0.9
+us : 0.0
+germany : 0.1
+canada : 0.0
+switzerland : 0.0
+japan : -0.0
+
+
+===========================================
+
+
+LAMBDA = 50.0e/t ; C = 7200.0kg ; total carbone : 6706.285694243906kg
+M. Europe
+france : 1.0
+us : -0.0
+germany : 0.0
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+Mme. US
+france : 0.1
+us : 0.7
+germany : 0.2
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+M. ???
+france : 0.9
+us : -0.0
+germany : 0.1
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+
+===========================================
+
+
+LAMBDA = 35.614e/t ; C = 7800.0kg ; total carbone : 7171.571538822938kg
+M. Europe
+france : 0.9
+us : -0.0
+germany : 0.1
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+Mme. US
+france : 0.0
+us : 0.7
+germany : 0.2
+canada : 0.0
+switzerland : -0.0
+japan : -0.0
+
+M. ???
+france : 0.6
+us : -0.0
+germany : 0.4
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+
+===========================================
+
+
+LAMBDA = 2.0e/t ; C = 8100.000000000001kg ; total carbone : 8099.830063274598kg
+M. Europe
+france : 0.6
+us : -0.0
+germany : 0.4
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+Mme. US
+france : 0.0
+us : 0.7
+germany : 0.3
+canada : 0.0
+switzerland : 0.0
+japan : 0.0
+
+M. ???
+france : 0.1
+us : -0.0
+germany : 0.9
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+
+===========================================
+
+
+LAMBDA = 0.0e/t ; C = 8400.0kg ; total carbone : 8102.757795317503kg
+M. Europe
+france : 0.6
+us : -0.0
+germany : 0.4
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
+
+Mme. US
+france : 0.0
+us : 0.7
+germany : 0.3
+canada : 0.0
+switzerland : 0.0
+japan : -0.0
+
+M. ???
+france : 0.1
+us : -0.0
+germany : 0.9
+canada : -0.0
+switzerland : -0.0
+japan : -0.0
