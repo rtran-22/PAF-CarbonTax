@@ -5,9 +5,11 @@ import numpy as np
 class industry:
     def __init__(self, name, benef, carb):
         self.name = name
-        self.benef = benef #benef est maintenant un vecteur (les bénéfices d'une industrie dépendent de chaque région)
+        self.benef = benef 
+        #benef est maintenant un vecteur (les bénéfices d'une industrie dépendent de chaque région)
         # [pi,1 ... pi,6]
-        self.carb = carb #carb est maintenant un vecteur
+        self.carb = carb 
+        #carb est maintenant un vecteur (même chose)
         # [ci,1 ... ci,6]
 
 
@@ -22,31 +24,34 @@ class region:
     def phi(self, product_quantities, industry_list, lmbda):
         sum = 0
         for i in range(0, len(industry_list)):
-            print(i)
-        
-            sum += product_quantities[i]*(self.benef[i] + lmbda*self.carb[i])
+            sum += product_quantities[i]*(self.benef[i] - lmbda*self.carb[i])   # j'ai change en - lmbda, peut etre une erreur de moi
         return sum
     
-    def min_phi(self, industry_list, lmbda):
+    def max_phi(self, industry_list, lmbda):
+
         x = cp.Variable(len(industry_list))
-        #print(x)
+        print(industry_list)
         constraints = [x >= 0]
         constraints.append(self.u(x) >= 1)
-        constraints.append((x[0]+x[1]+x[2] == 1))
+        constraints.append(x[0]+x[1]+x[2] == 1)
 
         def f(m):
             return self.phi(m, industry_list, lmbda)
-        print(f(x))
+        
         objective = cp.Maximize(f(x))
         prob = cp.Problem(objective, constraints)
-        result = prob.solve(solver=cp.CVXOPT)
-    
+        prob.solve()
+        print(x.value)
+        return (x.value, f(x.value))
+
+        """
         if result is not None:
             return (x.value, f(x.value))
         else:
         # Gérer l'échec de la résolution du problème d'optimisation
             return None
         #print(x.value)
+        """
 
 class commu:
     def __init__(self, region_list, industry_list):
@@ -112,7 +117,7 @@ class commu:
         return (x0 + x1) / 2
 
     def presentation_resultat(self, c_list, maxL=10, N=1000 * 2):  #paramètre C_list
-        self.D(10,1000000000000000000000000009000000000000009999999000000)
+        self.D(10,c_list[len(c_list)-1])
         """ for c in c_list:
             print("===========================================\n")
             ldbd = self.Dmax_fast(c,0, maxL, N, 400)
@@ -128,13 +133,19 @@ class commu:
                 print("")
             print("") """
 
-
+"""
 def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
     return x_t*(1 + (x/x_t)*(1/(tho*tho) - 1)) ** (1/2) #x_t moment où t'en as marre de consommer
+"""
+def simple_utility_function(x_t, tho, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
+    return (x_t + x*(1/(tho*tho) - 1)) ** (1/2) - x_t**(1/2) #x_t moment où t'en as marre de consommer
 
+#j'ai juste modifie un peu pour voir
 #
 def utility_function_bis(ranking, x_t_list,tho_list,x):
     return
+
+
 def utility_function(ranking, x_t_list, tho_list, x):  # ranking[i] < ranking[j] => on prefere i à j.
     sum2 = 0.0
     i = 0
@@ -162,19 +173,19 @@ x_tc = [1, 1, 1]
 
 def uidf(x):
     t = 0.5
-    return (utility_function(ridf, x_tidf, [t, t, t, t, t, t],x) -utility_function(ridf, x_tidf, [t, t, t, t, t, t], 0))
+    return utility_function(ridf, x_tidf, [t, t, t], x)
 
 def uauvergne(x):
     t = 0.5
-    return utility_function(ra, x_ta, [t, t, t, t, t, t], x)
+    return utility_function(ra, x_ta, [t, t, t], x)
 
 def uprovence(x):
     t = 0.5
-    return utility_function(rp, x_tp, [t, t, t, t, t, t], x)
+    return utility_function(rp, x_tp, [t, t, t], x)
 
 def ubretagne(x):
     t = 0.5
-    return utility_function(rb, x_tb, [t, t, t, t, t, t], x)
+    return utility_function(rb, x_tb, [t, t, t], x)
 
 def upaysdelaloire(x):
     t = 0.5
@@ -201,7 +212,24 @@ services = industry("Services", [2.99359e+11,1.99573e+11,1.25585e+11,82749686880
 
 industry_list = [agriculture, industrie, services]
 
-ens = commu([iledefrance, auvergne, provence, bretagne, paysdeloire, corse], industry_list=industry_list)
+#des petits tests : 
+def f(m):
+    return iledefrance.phi(m, industry_list, 0)
+
+x = cp.Variable(3)
+const = [x >= 0]
+const.append((x[0]+x[1]+x[2] <= 1))
+const.append(iledefrance.u(x)>=1)
+
+obj = cp.Maximize(f(x))
+prob = cp.Problem(obj, const)
+prob.solve()
+print(x.value)
+
+#iledefrance.max_phi(industry_list, 0)
 
 
-ens.presentation_resultat([3000000000,400000000000000000000000,50000000000000000000000])
+
+#industry_list = [agriculture, industrie, services]
+#ens = commu([iledefrance, auvergne, provence, bretagne, paysdeloire, corse], industry_list=industry_list)
+#ens.presentation_resultat([300,400,500])
