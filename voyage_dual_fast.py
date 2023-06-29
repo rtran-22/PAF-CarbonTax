@@ -201,6 +201,6 @@ ens = commu([agent_europe, agent_us, agent_sp], product_list=product_list)
 
 cop = 3 * 2000
 #ens.presentation_resultat([7500, 7600, 7800, 7900, 8000, 8100, 10000])
-ens.presentation_resultat([19000, 1000000])
+ens.presentation_resultat([10000])
 
 #ens.lmbda(6000, 7000, 75)

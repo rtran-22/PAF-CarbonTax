@@ -1,7 +1,6 @@
 import cvxpy as cp
 from functools import partial
 import math
-import pandas as pd
 import matplotlib.pyplot as plt
 
 class product:
@@ -49,11 +48,23 @@ class commu:
         prob.solve()
         
         #print(x.value)
-        return f(x.value)
+        return f(x.value), x.value
 
-        
+    def maxL(self, x0, x1, N, C):
+        x = [x0 + (x1-x0) * i / N for i in range(0,N+1)]
+        y_tmp = -1000000000
+        x_max = x0
+        for i in range(0, len(x)):
+            
+            y, x_list = self.D(C, x[i])
+            print(y)
+            if y > y_tmp:
+                print(x_max)
+                y_tmp = y
+                x_max = x[i]
+        print(x_max)
+        return x_max
 
-    
 
 #un exemple
 
@@ -84,13 +95,20 @@ agent3 = agent(partial(u, l3), prod_l)
 
 ens = commu([agent1, agent2, agent3])
 
+l = [x / 100 for x in range(0,100)]
 
-l = [g/10 for g in range(0,100)]
 #for g in l:
 #    print("D(" + str(g/200) +") = "+ str(ens.D(100, g/200)))
 
-plt.plot(l, [ens.D(100, g) for g in l])
-plt.plot(l, [ens.D(75, g) for g in l])
-plt.plot(l, [ens.D(50, g) for g in l])
+"""
+y_l  = []
+for x in l:
+    y, x = ens.D(75, x)
+    y_l.append(y)
+
+plt.plot(l, y_l)
 
 plt.show()
+"""
+
+ens.maxL(0, 10, 100, 75)
