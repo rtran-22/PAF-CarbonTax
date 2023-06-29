@@ -41,7 +41,7 @@ class region:
         
         constraints.append(self.u(x) >= 1)
         constraints.append(x[0]+x[1]+x[2] == 1)
-        constraints.append(x[0]>=0.05)
+        constraints.append(x[0]>=0.03)
         constraints.append(x[1]>=0.05)
         #constraints.append(x[2]>=0.1)
 
@@ -51,6 +51,10 @@ class region:
         objective = cp.Maximize(f(x))
         prob = cp.Problem(objective, constraints)
         prob.solve()
+        #plt.bar([1,2,3],x.value)
+        #plt.xlabel("Percentage")
+        #plt.title(self.name)
+        #plt.show()
         print(x.value)
         return (x.value, f(x.value))
     
@@ -80,6 +84,57 @@ class commu:
             sum = sum + y
             l.append(x)
         return (sum + ldbd*C), l
+    
+    def fAux(self, x0, x1, N, C):
+        x = [x0 + (x1-x0) * i / N for i in range(0,N+1)]
+        y_tmp = -10000000
+        for i in range(0, len(x)):
+            y, x_list = self.D(x[i], C)
+            if (y_tmp - y) >= 0:
+                return x[i-1], x[i]
+            else:
+                y_tmp = y
+        return x[N-1], x[N-1]
+
+    def Dmax_fast(self, C, x0, x1, N1, N2):
+        for i in range(0, N2):
+            x0, x1 = self.fAux(x0, x1, N1, C)
+            if abs((x1-x0)) < 0.0000001:
+                return (x0 + x1)/2
+        return (x0 + x1)/2
+    
+    def presentation_resultat(self, c_list, maxL = 500, N = 100): 
+        for c in c_list:
+            print("===========================================\n")
+            ldbd = self.Dmax_fast(c, 0, maxL, N, 150)
+            y, x = self.D(ldbd, c)
+            print("")
+            print("LAMBDA = " + str(round(ldbd*1000, 10)) + "e/t ; C = " + str(c) + "kg ; total carbone : " + str(self.carbon_total(x)) + "kg") 
+            for i in range(0, len(x)):
+                #print(self.agent_list[i].name + "> expenses : " + str(round(self.total_price(x[i]))) + " ; budget : " + str(round(self.agent_list[i].budget)))
+                print(self.agent_list[i].name)
+
+                for j in range(0, len(x[i])):
+                    print(self.product_list[j].name + " : " + str(round(abs(x[i][j]), 1)))
+                print("")
+            print("")
+        
+    def lmbda(self, Cmin, Cmax, N_pas):
+        c = []
+        lbda_l = []
+        for i in range(0, N_pas):
+            print(i)
+            ci = Cmin + ((Cmax - Cmin)/N_pas) * i
+            c.append(ci)
+            ldbd = self.Dmax_fast(ci, 0, 500, 30, 100)
+            lbda_l.append(ldbd)
+
+        plt.plot(c, lbda_l)
+        plt.grid()
+        plt.title("lambda en fonction de C")
+        plt.xlabel("C (kg)")
+        plt.ylabel("lambda ($/kg)")
+        plt.show()
 
 
 def simple_utility_function(x_t, t, x): #x_t[i] est la quantité à laquelle une augmentation de dx sera tho fois moins utile que la premiere
@@ -100,16 +155,16 @@ def u(x):
 
 
 
-ridf = [1, 2, 2.44]  # j'adore les services
-ra = [1, 3, 4]
+ridf = [1, 1.8, 2.43]  # j'adore les services
+ra = [0.98, 1.96, 2.549]
 rp = [2,1,2.4]
 rb = [4,1,0.07] # j'adore l'agriculture
 rpdl = [3,7,0.05]
-rc = [2,2,2.2]
+rc = [2,2,2.33]
 # pour tho = 0.5
 
 x_tidf = [1, 1, 1]  # en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
-x_ta = [1, 5, 1]
+x_ta = [1, 100, 0.001]
 x_tp = [1, 1, 1]
 x_tb = [1, 1, 1]
 x_tpdl = [1, 1, 1]
@@ -118,7 +173,6 @@ x_tc = [1, 1, 1]
 
 def uidf(x):
     t = 0.5
-    print(utility_function(ridf, x_tidf, [t, t, t, t, t, t],x))
     return utility_function(ridf, x_tidf, [t, t, t, t, t, t],x) 
 
 def uauvergne(x):
@@ -141,22 +195,49 @@ def ucorse(x):
     t = 0.5
     return utility_function(rc, x_tc, [t, t, t, t, t, t], x)
 print(u([0,0,0]))
-N = 10000000
+M = 10000000
 
-iledefrance = region("Ile de France", uidf, 12300000/N, 0)
-auvergne = region("Auvergne", uauvergne, 8200000/N, 1)
-provence = region("Provence", uprovence, 5160000/N,2)
-bretagne = region("Bretagne", ubretagne, 3400000/N, 3)
-paysdeloire = region("Pays de la Loire",upaysdelaloire ,3900000/N,4)
-corse = region("Corse", ucorse, 351000/N,5)
+iledefrance = region("Ile de France", uidf, 12300000/M, 0)
+auvergne = region("Auvergne", uauvergne, 8200000/M, 1)
+provence = region("Provence", uprovence, 5160000/M,2)
+bretagne = region("Bretagne", ubretagne, 3400000/M, 3)
+paysdeloire = region("Pays de la Loire",upaysdelaloire ,3900000/M,4)
+corse = region("Corse", ucorse, 351000/M,5)
 
 
-agriculture = industry("Agriculture", [6730953600/N,4487302400/N,2823717120/N,1860588800/N,2134204800/N,192078432/N], [16929110.55/N,11286073.7/N,7101968.329/N,4679591.535/N,5367766.76/N,483099.0084/N])
-industrie = industry("Industrie", [1.08495E+11/N,72329705560/N,45514790328/N,29990365720/N,34400713620/N,3096064226/N], [23979872.72/N,23979872.72/N,15089773.57/N,9942874.057/N,11405061.42/N,1026455.528/N])
-services = industry("Services", [2.99359e+11/N,1.99573e+11/N,1.25585e+11/N,82749686880/N,94918758480/N,8542688263/N], [10834630.75/N,7223087.169/N,4545259.731/N,2994938.582/N,3435370.727/N,309183.3654/N])
+agriculture = industry("Agriculture", [6730953600/M,4487302400/M,2823717120/M,1860588800/M,2134204800/M,192078432/M], [16929110.55/M,11286073.7/M,7101968.329/M,4679591.535/M,5367766.76/M,483099.0084/M])
+industrie = industry("Industrie", [1.08495E+11/M,72329705560/M,45514790328/M,29990365720/M,34400713620/M,3096064226/M], [23979872.72/M,23979872.72/M,15089773.57/M,9942874.057/M,11405061.42/M,1026455.528/M])
+services = industry("Services", [2.99359e+11/M,1.99573e+11/M,1.25585e+11/M,82749686880/M,94918758480/M,8542688263/M], [10834630.75/M,7223087.169/M,4545259.731/M,2994938.582/M,3435370.727/M,309183.3654/M])
 
 industry_list = [agriculture, industrie, services]
 region_list = [iledefrance, auvergne , provence , bretagne , paysdeloire , corse]
 
 ens = commu(region_list, industry_list)
-ens.D(0,10000000)
+r=ens.D(0,10000000)
+#ens.Dmax_fast()
+"""sectors=["Agriculture","Industry","Services"]
+sectorstat=[0,0,0]
+for i in range(len(sectors)):
+    for j in range(len(ens.region_list)):
+        sectorstat[i]+=r[1][j][i]/6
+#regions = {'Ile-De-France': r[1][0],'Auvergne': r[1][1],'Provence': r[1][2], 'Bretagne': r[1][3], 'Pays de la Loire' : r[1][4], 'Corse' : r[1][5]}
+
+print(sectorstat)
+
+plt.bar(sectors, sectorstat, color=['green', 'grey', 'blue'])
+plt.title('Sectors')
+
+#bottom = np.zeros(3)
+
+#fig, ax = plt.subplots()
+
+ #for region,region_sectors  in regions.items():
+ #   p = ax.bar(sectors, region_sectors, 0.6, label=region, bottom=bottom, color=['green', 'grey', 'blue'])
+  #  bottom += region_sectors
+
+
+#bar_container = ax.bar(sectors, r[1][0],color=['green', 'grey', 'blue'])
+#ax.bar_label(bar_container)
+#ax.set(ylabel='Percentage')
+
+plt.show()"""
