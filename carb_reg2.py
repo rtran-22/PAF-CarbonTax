@@ -215,7 +215,7 @@ region_list = [iledefrance, auvergne , provence , bretagne , paysdeloire , corse
 ens = commu(region_list, industry_list)
 r=ens.D(0,10000000)
 #ens.Dmax_fast()
-"""sectors=["Agriculture","Industry","Services"]
+sectors=["Agriculture","Industry","Services"]
 sectorstat=[0,0,0]
 for i in range(len(sectors)):
     for j in range(len(ens.region_list)):
@@ -240,4 +240,4 @@ plt.title('Sectors')
 #ax.bar_label(bar_container)
 #ax.set(ylabel='Percentage')
 
-plt.show()"""
+plt.show()
