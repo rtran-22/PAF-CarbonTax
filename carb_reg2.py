@@ -161,10 +161,10 @@ rp = [2,1,2.4]
 rb = [4,1,0.07] # j'adore l'agriculture
 rpdl = [3,7,0.05]
 rc = [2,2,2.33]
-# pour tho = 0.5
+# pour thau = 0.5
 
-x_tidf = [1, 1, 1]  # en gros, commence à moins aimer ger, swi et jap au bout de 5 voyages, le reste des le 1er
-x_ta = [1, 100, 0.001]
+x_tidf = [1, 1, 1]
+x_ta = [1, 1, 1]
 x_tp = [1, 1, 1]
 x_tb = [1, 1, 1]
 x_tpdl = [1, 1, 1]
@@ -222,22 +222,23 @@ for i in range(len(sectors)):
         sectorstat[i]+=r[1][j][i]/6
 #regions = {'Ile-De-France': r[1][0],'Auvergne': r[1][1],'Provence': r[1][2], 'Bretagne': r[1][3], 'Pays de la Loire' : r[1][4], 'Corse' : r[1][5]}
 
-print(sectorstat)
+#print(sectorstat)
 
-plt.bar(sectors, sectorstat, color=['green', 'grey', 'blue'])
-plt.title('Sectors')
+#plt.bar(sectors, sectorstat, color=['green', 'grey', 'blue'])
+#plt.title('Sectors')
 
 #bottom = np.zeros(3)
 
-#fig, ax = plt.subplots()
+fig, ax = plt.subplots()
 
  #for region,region_sectors  in regions.items():
  #   p = ax.bar(sectors, region_sectors, 0.6, label=region, bottom=bottom, color=['green', 'grey', 'blue'])
   #  bottom += region_sectors
 
 
-#bar_container = ax.bar(sectors, r[1][0],color=['green', 'grey', 'blue'])
-#ax.bar_label(bar_container)
-#ax.set(ylabel='Percentage')
+bar_container = ax.bar(sectors, r[1][5],color=['green', 'grey', 'blue'])
+ax.set_title("Corse")
+ax.bar_label(bar_container)
+ax.set(ylabel='Percentage')
 
 plt.show()
